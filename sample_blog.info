@@ -4,4 +4,4 @@ description = "Example of a custom entity 'Blog'"
 package = "Samples"
 version = "7.x-1.0"
 
-dependencies[] = entity_api
+dependencies[] = entity
