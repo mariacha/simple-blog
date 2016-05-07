@@ -3,3 +3,81 @@
  * @file
  * Sample custom entity 'blog'.
  */
+
+/**
+ * Implements hook_entity_info().
+ */
+function sample_blog_entity_info() {
+
+  $info = array();
+
+  $info['blog'] = array(
+    'label' => t('Blog'),
+    'base table' => 'blog',
+    'entity keys' => array(
+      'id' => 'bid',
+      'label' => 'title',
+    ),
+    'module' => 'sample_blog',
+    'entity class' => 'Entity',
+    'controller class' => 'EntityAPIController',
+    'access callback' => 'sample_blog_access_callback',
+    'uri callback' => 'entity_class_uri',
+    'admin ui' => array(
+      'path' => 'admin/blogs',
+      'controller class' => 'EntityDefaultUIController',
+    ),
+    'fieldable' => TRUE,
+    'bundles' => array(
+      'post' => array(
+        'label' => t('Blog Post'),
+        'admin' => array(
+          'path' => 'admin/blog-posts',
+        ),
+      ),
+      'story' => array(
+        'label' => t('Blog Story'),
+        'admin' => array(
+          'path' => 'admin/blog-stories',
+        ),
+      ),
+    ),
+  );
+
+  return $info;
+}
+
+/**
+ * Implements hook_menu().
+ */
+function sample_blog_menu() {
+  $items['blog/%sample_blog'] = array(
+    'title' => 'Blog',
+    'page callback' => 'sample_blog_view_blog',
+    'page arguments' => array(1),
+    'access arguments' => array('access content'),
+  );
+}
+
+/**
+ * Access callback for blog entities.
+ */
+function sample_blog_access_callback($op, $blog = NULL, $account = NULL) {
+  if ($op == 'view' || $op == 'update' || $op == 'create' || $op == 'delete') {
+    return TRUE;
+  }
+  else {
+    return FALSE;
+  }
+}
+
+/**
+ * Menu autoloader for blogs.
+ */
+function sample_blog_load($bid) {
+  if (!is_numeric($bid)) {
+    return FALSE;
+  }
+  $blog = entity_load_single('blog', $bid);
+  return $blog;
+}
