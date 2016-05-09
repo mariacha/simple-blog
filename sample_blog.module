@@ -61,11 +61,23 @@ function sample_blog_menu() {
   return $items;
 }
 
+
+/**
+ * Access callback for blog entities.
+ */
+function sample_blog_permission() {
+  return array(
+    'administer blogs' => array(
+      'title' => t('Administer Blog posts'),
+    ),
+  );
+}
+
 /**
  * Access callback for blog entities.
  */
 function sample_blog_access_callback($op, $blog = NULL, $account = NULL) {
-  if ($op == 'view' || $op == 'update' || $op == 'create' || $op == 'delete') {
+  if (user_access('administer blogs', $account)) {
     return TRUE;
   }
   else {
