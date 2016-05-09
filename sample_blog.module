@@ -16,7 +16,7 @@ function sample_blog_entity_info() {
     'base table' => 'blog',
     'entity keys' => array(
       'id' => 'bid',
-      'label' => 'title',
+      'label' => 'title'
     ),
     'module' => 'sample_blog',
     'entity class' => 'BlogEntity',
@@ -29,16 +29,10 @@ function sample_blog_entity_info() {
     ),
     'fieldable' => TRUE,
     'bundles' => array(
-      'post' => array(
+      'blog_types' => array(
         'label' => t('Blog Post'),
         'admin' => array(
-          'path' => 'admin/blog-posts',
-        ),
-      ),
-      'story' => array(
-        'label' => t('Blog Story'),
-        'admin' => array(
-          'path' => 'admin/blog-stories',
+          'path' => 'admin/blogs',
         ),
       ),
     ),
@@ -51,12 +45,20 @@ function sample_blog_entity_info() {
  * Implements hook_menu().
  */
 function sample_blog_menu() {
+  $items['blogs'] = array(
+    'title' => 'Blogs',
+    'page callback' => 'sample_blog_view_blogs',
+    'access arguments' => array('access content'),
+  );
+
   $items['blog/%blog_types'] = array(
     'title' => 'Blog',
     'page callback' => 'sample_blog_view_blog',
     'page arguments' => array(1),
     'access arguments' => array('access content'),
   );
+
+  return $items;
 }
 
 /**
@@ -78,7 +80,7 @@ function blog_types_load($bid) {
   if (!is_numeric($bid)) {
     return FALSE;
   }
-  $blog = entity_load_single('blog', $bid);
+  $blog = entity_load_single('blog_types', $bid);
   return $blog;
 }
 
@@ -93,6 +95,8 @@ function blog_types_form($form, &$form_state, $blog = NULL) {
     '#default_value' => isset($blog->title) ? $blog->title : '',
     '#required' => TRUE,
   );
+
+  field_attach_form('blog_types', $blog, $form, $form_state);
 
   $form['submit'] = array(
     '#type' => 'submit',
@@ -121,4 +125,58 @@ function blog_types_form_submit($form, &$form_state) {
   $blog->save();
   drupal_set_message(t('The blog: @title has been saved.', array('@title' => $blog->title)));
   $form_state['redirect'] = 'admin/blogs';
+}
+
+/**
+ * Callback for viewing a blog page.
+ *
+ * @return bool
+ */
+function sample_blog_view_blog($blog) {
+  $blogs = entity_load('blog_types', array($bid));
+  $blog = $blogs[$id];
+
+  drupal_set_title($blog->name);
+  $output = entity_view('blog_types', array($blog));
+
+  return $output;
+}
+
+/**
+ * Blog entity class extending the Entity class
+ */
+class BlogEntity extends Entity {
+
+  /**
+   * Change the default URI from default/id to Blog/id
+   */
+  protected function defaultUri() {
+    return array('path' => 'blog/' . $this->identifier());
+  }
+
+}
+
+/**
+ * Callback function to display list of blogs for unauthenticated users.
+ */
+function sample_blog_view_blogs() {
+  $query = new EntityFieldQuery();
+
+  $query->entityCondition('entity_type', 'blog_types')
+    ->entityCondition('bundle', 'blog_types')
+    ->pager(10);
+
+  $result = $query->execute();
+
+  $content = entity_view_multiple(entity_load_multiple('blog_types', array_keys($results['blog_types'])));
+
+  $build = array(
+    'content' => $content,
+    'pager' => array(
+      '#markup' => theme('pager'),
+      '#weight' => 10
+    )
+  );
+
+  return $build;
 }
