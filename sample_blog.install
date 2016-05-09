@@ -115,7 +115,7 @@ function sample_blog_enable() {
       'label' => 'Blog contents',
       'required' => 0,
       'settings' => array(
-        'display_summary' => 0,
+        'display_summary' => 1,
         'text_processing' => 1,
         'user_register_form' => FALSE,
       ),
