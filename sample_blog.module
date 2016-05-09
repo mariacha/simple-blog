@@ -133,10 +133,7 @@ function blog_types_form_submit($form, &$form_state) {
  * @return bool
  */
 function sample_blog_view_blog($blog) {
-  $blogs = entity_load('blog_types', array($bid));
-  $blog = $blogs[$id];
-
-  drupal_set_title($blog->name);
+  drupal_set_title($blog->title);
   $output = entity_view('blog_types', array($blog));
 
   return $output;
@@ -163,12 +160,11 @@ function sample_blog_view_blogs() {
   $query = new EntityFieldQuery();
 
   $query->entityCondition('entity_type', 'blog_types')
-    ->entityCondition('bundle', 'blog_types')
     ->pager(10);
 
-  $result = $query->execute();
+  $results = $query->execute();
 
-  $content = entity_view_multiple(entity_load_multiple('blog_types', array_keys($results['blog_types'])));
+  $content = entity_view('blog_types', entity_load('blog_types', array_keys($results['blog_types'])));
 
   $build = array(
     'content' => $content,
