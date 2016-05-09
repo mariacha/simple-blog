@@ -121,6 +121,7 @@ function blog_types_form_submit($form, &$form_state) {
 
   $blog->uid = $user->uid;
   $blog->changed = REQUEST_TIME;
+  $blog->type = 'blog_types';
 
   $blog->save();
   drupal_set_message(t('The blog: @title has been saved.', array('@title' => $blog->title)));
